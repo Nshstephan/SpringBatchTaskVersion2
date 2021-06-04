@@ -1,4 +1,4 @@
-package com.polixis.springbatchtaskversion2.processor;
+package com.polixis.springbatchtaskversion2.process;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

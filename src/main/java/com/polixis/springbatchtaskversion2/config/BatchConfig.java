@@ -2,15 +2,13 @@ package com.polixis.springbatchtaskversion2.config;
 
 import com.polixis.springbatchtaskversion2.dto.EmployeeDto;
 import com.polixis.springbatchtaskversion2.model.Employee;
-import com.polixis.springbatchtaskversion2.processor.ArchiveResourceItemReader;
-import com.polixis.springbatchtaskversion2.processor.DBLogProcessor;
+import com.polixis.springbatchtaskversion2.process.ArchiveResourceItemReader;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -75,15 +73,6 @@ public class BatchConfig {
     }
 
     /**
-     * Intermediate processor to do the operations after the reading the data from the CSV file and
-     * before writing the data into SQL.
-     */
-    @Bean
-    public ItemProcessor<Employee, Employee> processor() {
-        return new DBLogProcessor();
-    }
-
-    /**
      * The writer() method is used to write a data into the SQL.
      */
     @Bean
@@ -109,7 +98,6 @@ public class BatchConfig {
     {
         return stepBuilderFactory.get("step1").<Employee, Employee>chunk(5)
                 .reader(multiResourceItemReader())
-                .processor(processor())
                 .writer(writer()).build();
     }
 }
