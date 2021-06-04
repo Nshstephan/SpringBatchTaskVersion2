@@ -59,16 +59,29 @@ public class BatchConfig {
      */
     @Bean
     public FlatFileItemReader<EmployeeDto> reader() {
+        //Create reader instance
         FlatFileItemReader<EmployeeDto> reader = new FlatFileItemReader<>();
+
+        //Set number of lines to skips.
         reader.setLinesToSkip(1);
-        reader.setLineMapper(new DefaultLineMapper<>() {{
-            setLineTokenizer(new DelimitedLineTokenizer() {{
-                setNames("firstName", "lastName", "date");
-            }});
-            setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
-                setTargetType(EmployeeDto.class);
-            }});
-        }});
+
+        //Configure how each line will be parsed and mapped to different values
+        reader.setLineMapper(new DefaultLineMapper<>() {
+            {
+                //3 columns in each row
+                setLineTokenizer(new DelimitedLineTokenizer() {
+                    {
+                        setNames("firstName", "lastName", "date");
+                    }
+                });
+                //Set values in EmployeeDto class
+                setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
+                    {
+                        setTargetType(EmployeeDto.class);
+                    }
+                });
+            }
+        });
         return reader;
     }
 
@@ -76,8 +89,7 @@ public class BatchConfig {
      * The writer() method is used to write a data into the SQL.
      */
     @Bean
-    public JdbcBatchItemWriter<Employee> writer()
-    {
+    public JdbcBatchItemWriter<Employee> writer() {
         JdbcBatchItemWriter<Employee> writer = new JdbcBatchItemWriter<Employee>();
         writer.setItemSqlParameterSourceProvider(
                 new BeanPropertyItemSqlParameterSourceProvider<Employee>());
@@ -87,15 +99,13 @@ public class BatchConfig {
     }
 
     @Bean
-    public Job insertEmployeeJob()
-    {
+    public Job insertEmployeeJob() {
         return jobBuilderFactory.get("importEmployeeJob").incrementer(new RunIdIncrementer())
                 .start(step1()).build();
     }
 
     @Bean
-    public Step step1()
-    {
+    public Step step1() {
         return stepBuilderFactory.get("step1").<Employee, Employee>chunk(5)
                 .reader(multiResourceItemReader())
                 .writer(writer()).build();
