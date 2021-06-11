@@ -48,6 +48,7 @@ public class BatchConfig {
         resourceItemReader.setResource(resource);
         resourceItemReader.setDelegate(reader());
         resourceItemReader.setComparator(Comparator.comparing(Resource::getDescription));
+
         return resourceItemReader;
     }
 
@@ -79,6 +80,7 @@ public class BatchConfig {
                 });
             }
         });
+
         return reader;
     }
 
@@ -92,6 +94,7 @@ public class BatchConfig {
                 new BeanPropertyItemSqlParameterSourceProvider<EmployeeDto>());
         writer.setSql("INSERT INTO EMPLOYEE (FIRSTNAME, LASTNAME, DATE) VALUES (:firstName, :lastName, :date)");
         writer.setDataSource(dataSource);
+
         return writer;
     }
 
@@ -99,13 +102,15 @@ public class BatchConfig {
     public Job insertEmployeeJob() {
         return jobBuilderFactory.get("importEmployeeJob")
                 .incrementer(new RunIdIncrementer())
-                .start(step1()).build();
+                .start(step1())
+                .build();
     }
 
     @Bean
     public Step step1() {
         return stepBuilderFactory.get("step1").<EmployeeDto, EmployeeDto>chunk(50)
                 .reader(multiResourceItemReader())
-                .writer(writer()).build();
+                .writer(writer())
+                .build();
     }
 }
