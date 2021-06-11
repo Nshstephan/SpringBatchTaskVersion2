@@ -1,12 +1,9 @@
 package com.polixis.springbatchtaskversion2.dto;
 
-import com.polixis.springbatchtaskversion2.model.Employee;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-public class EmployeeDto extends Employee {
+@Data
+public class EmployeeDto {
 
     private String firstName;
 

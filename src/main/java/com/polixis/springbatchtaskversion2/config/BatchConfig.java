@@ -1,11 +1,9 @@
 package com.polixis.springbatchtaskversion2.config;
 
 import com.polixis.springbatchtaskversion2.dto.EmployeeDto;
-import com.polixis.springbatchtaskversion2.model.Employee;
 import com.polixis.springbatchtaskversion2.process.ArchiveResourceItemReader;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -26,7 +24,6 @@ import javax.sql.DataSource;
 import java.util.Comparator;
 
 @Configuration
-@EnableBatchProcessing
 public class BatchConfig {
 
     @Autowired
@@ -89,10 +86,10 @@ public class BatchConfig {
      * The writer() method is used to write a data into the SQL.
      */
     @Bean
-    public JdbcBatchItemWriter<Employee> writer() {
-        JdbcBatchItemWriter<Employee> writer = new JdbcBatchItemWriter<Employee>();
+    public JdbcBatchItemWriter<EmployeeDto> writer() {
+        JdbcBatchItemWriter<EmployeeDto> writer = new JdbcBatchItemWriter<EmployeeDto>();
         writer.setItemSqlParameterSourceProvider(
-                new BeanPropertyItemSqlParameterSourceProvider<Employee>());
+                new BeanPropertyItemSqlParameterSourceProvider<EmployeeDto>());
         writer.setSql("INSERT INTO EMPLOYEE (FIRSTNAME, LASTNAME, DATE) VALUES (:firstName, :lastName, :date)");
         writer.setDataSource(dataSource);
         return writer;
@@ -100,13 +97,14 @@ public class BatchConfig {
 
     @Bean
     public Job insertEmployeeJob() {
-        return jobBuilderFactory.get("importEmployeeJob").incrementer(new RunIdIncrementer())
+        return jobBuilderFactory.get("importEmployeeJob")
+                .incrementer(new RunIdIncrementer())
                 .start(step1()).build();
     }
 
     @Bean
     public Step step1() {
-        return stepBuilderFactory.get("step1").<Employee, Employee>chunk(5)
+        return stepBuilderFactory.get("step1").<EmployeeDto, EmployeeDto>chunk(50)
                 .reader(multiResourceItemReader())
                 .writer(writer()).build();
     }
